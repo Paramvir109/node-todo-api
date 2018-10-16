@@ -24,6 +24,11 @@ app.post('/todos', (req, res) => {//URl to which we want to send json data(todo)
     })
 })
 
+app.get('/todos', (req,res) => {
+    Todo.find().then((todos) => {
+        res.send(todos)
+    }, (e) => {console.log(e)})
+})
 app.listen(3000, () => {
     console.log('Server running')
 });
