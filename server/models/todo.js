@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 
 var Todo = mongoose.model('Todo', {//Now we can create instance of this model
     //mongoose will automatically lower cased and pluralise Todo --> todos
+    //will automatically create todos collection
     text :{
         type : String,
         required : true,//validator

@@ -9,7 +9,7 @@ var User = mongoose.model('User', {
 })
 module.exports = {User}
 
-// let myUser = new User({email : ' abc@pmail.com '})
+// let myUser = new User({email : ' abc@pmail.com '}) ////We cant add here as no connection to database
 // myUser.save().then((doc) => {
 //     console.log('User added', doc)
 // },(e) => {
