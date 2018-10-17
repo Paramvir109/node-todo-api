@@ -11,6 +11,7 @@ var {Todo} = require('./models/todo')
 var {User} = require('./models/users')
 
 var app = express()
+const port = process.env.PORT || 3000 //For heroku
 app.use(bodyParser.json())//return value of this method is being given as middleware
 
 app.post('/todos', (req, res) => {//URl to which we want to send json data(todo)
@@ -47,8 +48,8 @@ app.get('/todos/:id', (req, res) => {//Use : for query params
 
 })
 
-app.listen(3000, () => {
-    console.log('Server running')
+app.listen(port, () => {
+    console.log(`Server running on ${port}`)
 });
 
 
