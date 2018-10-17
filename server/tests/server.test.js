@@ -110,4 +110,42 @@ describe('GET /todos/:id' ,() => {
     })
 })
 
+describe('DELETE /todos/:id' ,() => {
+    it('should delete the todo with specified id', (done) => {
+        const id = myTodos[1]._id;
+        request(app)
+        .delete(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(myTodos[1].text);
+        })
+        .end((err,res) =>{
+            if(err) {
+               return done(err)
+            }
+            Todo.find().then((todos)=>{
+                expect(todos).toExclude(myTodos[1])
+                done()
+            }).catch((e) => done(e))
+        });
+    })
+    it('should return 404 if todo not found', (done) => {
+        const id = new ObjectID();
+        request(app)
+        .delete(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .expect(404)
+        
+        .end(done);
+    })
+
+    it('should return 404 for invalid ID', (done) => {
+        const id = '123'
+        request(app)
+        .get(`/todos/${id}`)//We can send without hex string as well
+        .expect(404)
+        
+        .end(done);
+    })
+})
+
 

@@ -55,7 +55,7 @@ app.delete('/todos/:id', (req, res) => {//Use : for query params
     if(!ObjectID.isValid(id)) {
         return res.status(404).send('Invalid object id')
     }
-    Todo.findByIdAndRemove(id).then((todo) => {
+    Todo.findByIdAndDelete(id).then((todo) => {
         if(todo){
            return res.send({todo})
         }
