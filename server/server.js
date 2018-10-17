@@ -3,6 +3,8 @@
 //Use killall -9 node to kill the server running(EADDR error)
 const express = require('express');
 const bodyParser = require('body-parser');//Parses string to json body for POST operations
+const {ObjectID} = require('mongodb')
+
 
 var {mongoose} = require('./db/mongoose')
 var {Todo} = require('./models/todo')
@@ -26,12 +28,30 @@ app.post('/todos', (req, res) => {//URl to which we want to send json data(todo)
 
 app.get('/todos', (req,res) => {
     Todo.find().then((todos) => {
-        res.send(todos)
+        res.send({todos})
     }, (e) => {console.log(e)})
 })
+
+//fetching an individual todo
+app.get('/todos/:id', (req, res) => {//Use : for query params
+    const id = req.params.id;//req.params will be an object with id property with value we specify
+    if(!ObjectID.isValid(id)) {
+        return res.status(400).send('Invalid object id')
+    }
+    Todo.findById(id).then((doc) => {
+        if(doc){//If doc exists
+           return res.send({doc})
+        }
+        res.status(404).send(doc)
+    }).catch((e) => res.status(400).send(e))
+
+})
+
 app.listen(3000, () => {
     console.log('Server running')
 });
+
+
 
 module.exports = {app}
 
