@@ -1,5 +1,7 @@
 const expect = require('expect')
 const request = require('supertest')
+const {ObjectID} = require('mongodb')
+
 
 const app = require('./../server.js').app//Or use destructuring
 const {Todo} = require('./../models/todo')
@@ -10,6 +12,7 @@ const myTodos = [
         text : 'First test todo'
     },
     {
+        _id : new ObjectID(),
         text : 'Second test todo'
     }
 
@@ -70,8 +73,39 @@ describe('GET /todos' ,() => {
         .get('/todos')
         .expect(200)
         .expect((res) => {
-            expect(res.body.length).toBe(2)
+            expect(res.body.todos.length).toBe(2)
+          
+
         })
+        .end(done);
+    })
+})
+describe('GET /todos/:id' ,() => {
+    it('should return the todo with specified id', (done) => {
+        const id = myTodos[1]._id;
+        request(app)
+        .get(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(myTodos[1].text);
+        })
+        .end(done);
+    })
+    it('should return 404 if todo not found', (done) => {
+        const id = new ObjectID();
+        request(app)
+        .get(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .expect(404)
+        
+        .end(done);
+    })
+
+    it('should return 404 for invalid ID', (done) => {
+        const id = '123'
+        request(app)
+        .get(`/todos/${id}`)//We can send without hex string as well
+        .expect(404)
+        
         .end(done);
     })
 })

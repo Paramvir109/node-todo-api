@@ -28,7 +28,7 @@ app.post('/todos', (req, res) => {//URl to which we want to send json data(todo)
 
 app.get('/todos', (req,res) => {
     Todo.find().then((todos) => {
-        res.send({todos})
+        res.send({todos})//will send object with todos prop with value which is an array
     }, (e) => {console.log(e)})
 })
 
@@ -36,13 +36,13 @@ app.get('/todos', (req,res) => {
 app.get('/todos/:id', (req, res) => {//Use : for query params
     const id = req.params.id;//req.params will be an object with id property with value we specify
     if(!ObjectID.isValid(id)) {
-        return res.status(400).send('Invalid object id')
+        return res.status(404).send('Invalid object id')
     }
-    Todo.findById(id).then((doc) => {
-        if(doc){//If doc exists
-           return res.send({doc})
+    Todo.findById(id).then((todo) => {
+        if(todo){//If doc exists
+           return res.send({todo})
         }
-        res.status(404).send(doc)
+        res.status(404).send(todo)
     }).catch((e) => res.status(400).send(e))
 
 })
