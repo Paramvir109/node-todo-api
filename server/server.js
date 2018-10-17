@@ -47,6 +47,22 @@ app.get('/todos/:id', (req, res) => {//Use : for query params
     }).catch((e) => res.status(400).send(e))
 
 })
+//Deleting todos
+//Todo.remove({}).then((res)=>{},(e) => {})... -> removes all todos(res is an object)
+//Todo.findOneAndRemove().... Todo.findbyidandremove()- These will return the deleted object
+app.delete('/todos/:id', (req, res) => {//Use : for query params
+    const id = req.params.id;//req.params will be an object with id property with value we specify
+    if(!ObjectID.isValid(id)) {
+        return res.status(404).send('Invalid object id')
+    }
+    Todo.findByIdAndRemove(id).then((todo) => {
+        if(todo){
+           return res.send({todo})
+        }
+        res.status(404).send()
+    }).catch((e) => res.status(400).send(e))
+
+})
 
 app.listen(port, () => {
     console.log(`Server running on ${port}`)
