@@ -9,7 +9,10 @@ const {User} = require('./../models/users')
 
 const myTodos = [
     {
-        text : 'First test todo'
+        _id : new ObjectID(),
+        text : 'First test todo',
+        completed : true,
+        completedAt : 333
     },
     {
         _id : new ObjectID(),
@@ -145,6 +148,36 @@ describe('DELETE /todos/:id' ,() => {
         .expect(404)
         
         .end(done);
+    })
+})
+describe('PATCH todos/id', () => {
+    it('should update the todo', (done) => {
+        const id = myTodos[1]._id
+        let upTodo = {
+            text : 'Updated text',
+            completed : true
+        }
+        request(app)
+        .patch(`/todos/${id.toHexString()}`)
+        .send(upTodo)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(upTodo.text)
+            expect(res.body.todo.completedAt).toBeA('number')//Usie in quotes
+        })
+        .end(done)
+    })
+    it('should clear the completedAt when completed is false', (done) => {
+        const id = myTodos[0]._id
+        request(app)
+        .patch(`/todos/${id.toHexString()}`)
+        .send({completed : false})
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.completedAt).toNotExist();
+        })
+        .end(done)
+        
     })
 })
 
