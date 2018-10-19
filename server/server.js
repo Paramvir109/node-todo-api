@@ -1,6 +1,8 @@
 //Mongoose is an Object Document Mapper (ODM). This means that Mongoose allows you to define objects 
 // /with a strongly-typed schema that is mapped to a MongoDB document.
 //Use killall -9 node to kill the server running(EADDR error)
+require('./config/config')
+
 const express = require('express');
 const bodyParser = require('body-parser');//Parses string to json body for POST operations
 const {ObjectID} = require('mongodb')
