@@ -66,7 +66,7 @@ app.delete('/todos/:id', (req, res) => {//Use : for query params
     }).catch((e) => res.status(400).send(e))
 
 })
-app.patch('/todos/:id' , (req, res) =>{
+app.patch('/todos/:id' , (req, res) =>{  
     const id = req.params.id;
     var body = _.pick(req.body , ['text' , 'completed'])//User can only change these props in req.body object
 
@@ -87,6 +87,17 @@ app.patch('/todos/:id' , (req, res) =>{
         }
         res.send({todo})
     }).catch((e) => res.status(400).send())
+})
+
+//POST user(as we have made changes in user model Therefore drop the database before proceeding with the route)
+app.post('/users', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password'])
+    let newUser = new User(body)
+    newUser.save().then((user) => {
+        return user.generateAuthToken()//Instance method(Different from model method)
+    }).then((token) => {//To json is overrided method in schemas
+        res.header('x-auth' , token).send(newUser.toJSON())//Use x auth for more flexibilty
+    }).catch((e) => res.status(400).send(e))
 })
 
 app.listen(port, () => {
