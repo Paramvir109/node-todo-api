@@ -8,7 +8,7 @@ var data = {
 var token = jwt.sign(data, '123abc');//123abc is our salt
 console.log(token);
 
-var decoded = jwt.verify(token, '123abc');
+var decoded = jwt.verify(token, '123abc');//Will throw error if signature or token is different
 console.log('decoded', decoded);
 
 var message = 'Hello test'

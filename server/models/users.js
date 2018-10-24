@@ -44,11 +44,29 @@ UserSchema.methods.toJSON = function() {//Overrided method
 UserSchema.methods.generateAuthToken = function() {//This is an instance method(Relatod to individual user)
     var user = this;
     var access = 'auth';
-    var token = jwt.sign({id : user._id.toHexString() , access}, 'abc123').toString();
+    var token = jwt.sign({_id : user._id.toHexString() , access}, 'abc123').toString();
     user.tokens = user.tokens.concat([{access, token}])
     return user.save().then(() => {
         return token
     })
+}
+
+UserSchema.statics.findByToken = function(token) {
+    var User = this
+    var decoded
+    try {
+        decoded = jwt.verify(token, 'abc123')//Will throw error if sth goes south
+    } catch (error) {
+        // return new Promise((resolve, reject) => {
+        //     reject();//Will fire the catch block in server.js
+        // })
+        return Promise.reject();
+    }
+    return User.findOne({
+        '_id' : decoded._id,
+        'tokens.access' : 'auth',
+        'tokens.token' : token
+    })//Returns a promise
 }
 var User = mongoose.model('User', UserSchema)
 module.exports = {User}

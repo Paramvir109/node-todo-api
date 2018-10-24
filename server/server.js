@@ -9,6 +9,7 @@ const {ObjectID} = require('mongodb')
 const _ = require('lodash')
 
 
+var {authenticate} = require('./middleware/authenticate')
 var {mongoose} = require('./db/mongoose')
 var {Todo} = require('./models/todo')
 var {User} = require('./models/users')
@@ -98,6 +99,13 @@ app.post('/users', (req, res) => {
     }).then((token) => {//To json is overrided method in schemas
         res.header('x-auth' , token).send(newUser.toJSON())//Use x auth for more flexibilty
     }).catch((e) => res.status(400).send(e))
+})
+
+
+
+//Private route
+app.get('/users/me' , authenticate,(req, res) => {
+   res.send(req.user)
 })
 
 app.listen(port, () => {
