@@ -1,7 +1,7 @@
 var {User} = require('./../models/users')
 
 
-var authenticate = (req, res, next) => {//Middleware
+var authenticate = (req, res, next) => {//Middleware for express
     let token = req.header('x-auth')
     User.findByToken(token).then((user) => {
         if(!user) {//No user found 

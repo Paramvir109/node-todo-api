@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const jwt = require('jsonwebtoken');
 const _ = require('lodash')
+const bcrypt = require('bcryptjs')
+
 
 var UserSchema = new mongoose.Schema({
     email : {
@@ -68,6 +70,21 @@ UserSchema.statics.findByToken = function(token) {
         'tokens.token' : token
     })//Returns a promise
 }
+
+UserSchema.pre('save', function(next) {//mongoose middleware
+    var user = this//To get current instance 
+    if(user.isModified('password')) {
+        bcrypt.genSalt(10).then((salt) => {
+            //more the no. of rounds more time bcrypt algo takes(prevent bruteforce attack)
+            return bcrypt.hash(user.password, salt)
+          }).then((hash) => {
+            user.password = hash
+            next()
+          }).catch((e) =>{next(e)})
+    }else {
+        next();//if only emil is changed we dont want to generate new hash password
+    }
+})
 var User = mongoose.model('User', UserSchema)
 module.exports = {User}
 

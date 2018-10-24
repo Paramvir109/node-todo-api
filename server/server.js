@@ -7,6 +7,7 @@ const express = require('express');
 const bodyParser = require('body-parser');//Parses string to json body for POST operations
 const {ObjectID} = require('mongodb')
 const _ = require('lodash')
+const bcrypt = require('bcryptjs')
 
 
 var {authenticate} = require('./middleware/authenticate')
