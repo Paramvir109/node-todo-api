@@ -70,6 +70,21 @@ UserSchema.statics.findByToken = function(token) {
         'tokens.token' : token
     })//Returns a promise
 }
+UserSchema.statics.findByCredentials = function(email, password) {
+    var User = this
+    return User.findOne({email}).then((user) => {
+        if(!user) { 
+            return Promise.reject();
+        }
+       return bcrypt.compare(password, user.password).then((res) => {
+            if(res){
+                return Promise.resolve(user)
+            }
+           return  Promise.reject()
+        }).catch((e) =>  Promise.reject())
+            
+    })
+}
 
 UserSchema.pre('save', function(next) {//mongoose middleware
     var user = this//To get current instance 
