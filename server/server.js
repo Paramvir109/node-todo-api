@@ -97,8 +97,8 @@ app.post('/users', (req, res) => {
     let newUser = new User(body)
     newUser.save().then((user) => {
         return user.generateAuthToken()//Instance method(Different from model method)
-    }).then((token) => {//To json is overrided method in schemas
-        res.header('x-auth' , token).send(newUser.toJSON())//Use x auth for more flexibilty
+    }).then((token) => {//To json is overrided method in schemas(explicitly called when res.send is used)
+        res.header('x-auth' , token).send(newUser)//Use x auth for more flexibilty
     }).catch((e) => res.status(400).send(e))
 })
 
@@ -114,7 +114,6 @@ app.post('/users/login' ,(req,res) => {
     let body = _.pick(req.body, ['email', 'password'])
     User.findByCredentials(body.email, body.password).then((user) => {
         console.log(user)
-        //res.send(user)//This will explicitly call toJSON this we would only get id and email property
         return user.generateAuthToken().then((token) => {
         res.header('x-auth' , token).send(user)
         })
