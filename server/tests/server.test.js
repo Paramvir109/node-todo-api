@@ -209,7 +209,7 @@ describe('POST /users' ,() => {
                 expect(doc).toExist()
                 expect(doc.password).toNotEqual(user.password)
                 done()
-            })
+            }).catch((e) => done(e))
         })
         
     })
@@ -238,5 +238,55 @@ describe('POST /users' ,() => {
         
     })
 })
-
+describe('POST /users/login' ,() => {
+    it('should login correctly and return auth token', (done) => {
+        let user = {
+            email : myUser[1].email,//myusers[0] will fail as it'll have two tokens in token array
+            password : myUser[1].password
+        }
+        request(app)
+        .post('/users/login')
+        .send(user)
+        .expect(200)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toExist()
+        })
+        .end((err,res)=>{
+            if(err) {
+                return done(err)
+            }
+            User.findById(res.body._id).then((doc) => {//Or use myUser[1]._id
+                expect(doc.tokens[0]).toInclude( {
+                    access : 'auth',
+                    token : res.headers['x-auth']
+                })
+                done()
+            }).catch((e) => done(e))
+        })
+    })
+    it('should return invalid login ' , (done) => {
+        let user = {
+            email : myUser[1].email,
+            password : 'asdasdasd'
+        }
+        request(app)
+        .post('/users/login')
+        .send(user)
+        .expect(400)
+        .expect((res) => {
+            expect(res.headers['x-auth']).toNotExist()
+        })
+        .end((err,res)=>{
+            if(err) {
+                return done(err)
+            }
+            User.findById(myUser[1]._id).then((doc) => {
+                expect(doc.tokens.length).toBe(0)
+                done()
+            }).catch((e) => done(e))
+        })
+        
+    })
+   
+})
 

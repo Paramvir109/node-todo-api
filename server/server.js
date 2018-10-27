@@ -97,7 +97,7 @@ app.post('/users', (req, res) => {
     let newUser = new User(body)
     newUser.save().then((user) => {
         return user.generateAuthToken()//Instance method(Different from model method)
-    }).then((token) => {//To json is overrided method in schemas(explicitly called when res.send is used)
+    }).then((token) => {//To json is overrided method in schemas(implicitly called when res.send is used)
         res.header('x-auth' , token).send(newUser)//Use x auth for more flexibilty
     }).catch((e) => res.status(400).send(e))
 })
@@ -113,7 +113,6 @@ app.get('/users/me' , authenticate,(req, res) => {
 app.post('/users/login' ,(req,res) => {
     let body = _.pick(req.body, ['email', 'password'])
     User.findByCredentials(body.email, body.password).then((user) => {
-        console.log(user)
         return user.generateAuthToken().then((token) => {
         res.header('x-auth' , token).send(user)
         })

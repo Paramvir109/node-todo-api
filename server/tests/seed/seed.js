@@ -51,7 +51,7 @@ const populateUsers = (done) => {//to empty the database before all assertions f
         let userTwo = new User(myUser[1]).save()//We use save instead of insert to call the middleware
         
        return Promise.all([userOne, userTwo])//Will simultaneously resolve the promise
-    }).then(() => done())
+    }).then(() => done()).catch((e) => done(e))
 
 }
 module.exports = {

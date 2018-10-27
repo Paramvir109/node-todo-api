@@ -26,7 +26,7 @@ var UserSchema = new mongoose.Schema({
         minlength : 6,
 
     },
-    tokens : [{
+    tokens : [{//new object id for this object will automatcally get created
         access :{
             type : String,
             required : true
