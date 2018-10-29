@@ -26,7 +26,6 @@ Todo.findOne({//returns first one
 }).catch((e) => {
     console.log(e)
 })
-
 Todo.findById(id).then((todo) => { 
     if(todo === null) {
         return console.log('NO TODO')

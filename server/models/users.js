@@ -52,6 +52,14 @@ UserSchema.methods.generateAuthToken = function() {//This is an instance method(
         return token
     })
 }
+UserSchema.methods.removeToken = function(token) {
+    var user = this;
+    return user.update({
+        $pull : {//Array method (remove particular element of array {here the whole access and token object})
+            tokens : {token}
+        }
+    })
+}
 
 UserSchema.statics.findByToken = function(token) {
     var User = this

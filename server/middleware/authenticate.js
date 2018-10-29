@@ -11,7 +11,7 @@ var authenticate = (req, res, next) => {//Middleware for express
         req.token = token;
         next();//only then rest of the route will execute(res.send())
     }).catch((e) => {
-        res.status(401).send()
+        res.status(401).send()//unauthorised
     })
 }
 
