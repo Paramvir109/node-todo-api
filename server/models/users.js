@@ -56,7 +56,7 @@ UserSchema.methods.removeToken = function(token) {
     var user = this;
     return user.update({
         $pull : {//Array method (remove particular element of array {here the whole access and token object})
-            tokens : {token}
+            tokens : {token}//remove that value from array whose token property matches token in argument
         }
     })
 }
