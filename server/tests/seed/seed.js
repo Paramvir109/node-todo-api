@@ -4,17 +4,21 @@ const jwt = require('jsonwebtoken');
 
 const {Todo} = require('./../../models/todo')
 const {User} = require('./../../models/users')
+const user1ID = new ObjectID()
+const user2ID = new ObjectID()
 
 const myTodos = [
     {
         _id : new ObjectID(),
         text : 'First test todo',
         completed : true,
-        completedAt : 333
+        completedAt : 333,
+        _creator : user1ID
     },
     {
         _id : new ObjectID(),
-        text : 'Second test todo'
+        text : 'Second test todo',
+        _creator : user2ID
     }
 
 ]
@@ -24,8 +28,7 @@ const populateTodos = (done) => {//to empty the database before all assertions f
     }).then(() => done())
 
 }
-const user1ID = new ObjectID()
-const user2ID = new ObjectID()
+
 const myUser = [
     {
         _id : user1ID,
@@ -42,6 +45,12 @@ const myUser = [
         _id : user2ID,
         email : 'okay2@ymail.com',
         password : 'userpasstwo',
+        tokens : [//adding this to change the tests.(Done at 14th video)
+            {
+            access : 'auth',
+            token : jwt.sign({_id : user2ID, access : 'auth'}, 'abc123').toString()
+            }
+        ]
     }
 
 ]

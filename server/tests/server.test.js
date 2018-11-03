@@ -16,6 +16,7 @@ describe('POST /todos', () => {
         let text = 'Test todo text'
         request(app)
         .post('/todos')
+        .set('x-auth', myUser[0].tokens[0].token )
         .send({text})//supertest automatically converts it into json
         .expect(200)
         .expect((res) => {
@@ -37,6 +38,7 @@ describe('POST /todos', () => {
     it('should not create a new todo', (done) => {
         request(app)
         .post('/todos')
+        .set('x-auth', myUser[0].tokens[0].token )
         .send({})
         .expect(400)
         .end((err, res) => {
@@ -57,9 +59,10 @@ describe('GET /todos' ,() => {
     it('should return the todos', (done) => {
         request(app)
         .get('/todos')
+        .set('x-auth', myUser[0].tokens[0].token )
         .expect(200)
         .expect((res) => {
-            expect(res.body.todos.length).toBe(2)
+            expect(res.body.todos.length).toBe(1)//As there is only 1 todo with _creator as user1ID in seed database
           
 
         })
@@ -68,19 +71,30 @@ describe('GET /todos' ,() => {
 })
 describe('GET /todos/:id' ,() => {
     it('should return the todo with specified id', (done) => {
+        const id = myTodos[0]._id;
+        request(app)
+        .get(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .set('x-auth', myUser[0].tokens[0].token )
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(myTodos[0].text);
+        })
+        .end(done);
+    })
+    it('should not return the todo created by another user', (done) => {
         const id = myTodos[1]._id;
         request(app)
         .get(`/todos/${id.toHexString()}`)//We can send without hex string as well
-        .expect(200)
-        .expect((res) => {
-            expect(res.body.todo.text).toBe(myTodos[1].text);
-        })
+        .set('x-auth', myUser[0].tokens[0].token )
+        .expect(404)
+        
         .end(done);
     })
     it('should return 404 if todo not found', (done) => {
         const id = new ObjectID();
         request(app)
         .get(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .set('x-auth', myUser[0].tokens[0].token )
         .expect(404)
         
         .end(done);
@@ -90,6 +104,7 @@ describe('GET /todos/:id' ,() => {
         const id = '123'
         request(app)
         .get(`/todos/${id}`)//We can send without hex string as well
+        .set('x-auth', myUser[0].tokens[0].token )
         .expect(404)
         
         .end(done);
@@ -97,10 +112,11 @@ describe('GET /todos/:id' ,() => {
 })
 
 describe('DELETE /todos/:id' ,() => {
-    it('should delete the todo with specified id', (done) => {
+    it('should delete the todo with specified id and proper authentication', (done) => {
         const id = myTodos[1]._id;
         request(app)
         .delete(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .set('x-auth', myUser[1].tokens[0].token )
         .expect(200)
         .expect((res) => {
             expect(res.body.todo.text).toBe(myTodos[1].text);
@@ -109,8 +125,24 @@ describe('DELETE /todos/:id' ,() => {
             if(err) {
                return done(err)
             }
-            Todo.find().then((todos)=>{
-                expect(todos).toExclude(myTodos[1])
+            Todo.findById(id).then((todo)=>{
+                expect(todo).toNotExist()
+                done()
+            }).catch((e) => done(e))
+        });
+    })
+    it('should not delete the todo with improper authentication', (done) => {
+        const id = myTodos[0]._id;
+        request(app)
+        .delete(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .set('x-auth', myUser[1].tokens[0].token )
+        .expect(404)
+        .end((err,res) =>{
+            if(err) {
+               return done(err)
+            }
+            Todo.findById(id).then((todo)=>{
+                expect(todo).toExist()
                 done()
             }).catch((e) => done(e))
         });
@@ -119,6 +151,7 @@ describe('DELETE /todos/:id' ,() => {
         const id = new ObjectID();
         request(app)
         .delete(`/todos/${id.toHexString()}`)//We can send without hex string as well
+        .set('x-auth', myUser[1].tokens[0].token )
         .expect(404)
         
         .end(done);
@@ -127,7 +160,8 @@ describe('DELETE /todos/:id' ,() => {
     it('should return 404 for invalid ID', (done) => {
         const id = '123'
         request(app)
-        .get(`/todos/${id}`)//We can send without hex string as well
+        .delete(`/todos/${id}`)//We can send without hex string as well
+        .set('x-auth', myUser[1].tokens[0].token )
         .expect(404)
         
         .end(done);
@@ -142,6 +176,7 @@ describe('PATCH todos/id', () => {
         }
         request(app)
         .patch(`/todos/${id.toHexString()}`)
+        .set('x-auth', myUser[1].tokens[0].token )
         .send(upTodo)
         .expect(200)
         .expect((res) => {
@@ -150,10 +185,25 @@ describe('PATCH todos/id', () => {
         })
         .end(done)
     })
-    it('should clear the completedAt when completed is false', (done) => {
+    it('should not update the todo with improper authentication', (done) => {
         const id = myTodos[0]._id
+        let upTodo = {
+            text : 'Updated text',
+            completed : true
+        }
         request(app)
         .patch(`/todos/${id.toHexString()}`)
+        .set('x-auth', myUser[1].tokens[0].token )
+        .send(upTodo)
+        .expect(404)
+       
+        .end(done)
+    })
+    it('should clear the completedAt when completed is false', (done) => {
+        const id = myTodos[1]._id
+        request(app)
+        .patch(`/todos/${id.toHexString()}`)
+        .set('x-auth', myUser[1].tokens[0].token )
         .send({completed : false})
         .expect(200)
         .expect((res) => {
@@ -256,7 +306,7 @@ describe('POST /users/login' ,() => {
                 return done(err)
             }
             User.findById(res.body._id).then((doc) => {//Or use myUser[1]._id
-                expect(doc.tokens[0]).toInclude( {
+                expect(doc.tokens[1]).toInclude( {//As 0th item contains hardcoded token(of User id 2)
                     access : 'auth',
                     token : res.headers['x-auth']
                 })
@@ -281,7 +331,7 @@ describe('POST /users/login' ,() => {
                 return done(err)
             }
             User.findById(myUser[1]._id).then((doc) => {
-                expect(doc.tokens.length).toBe(0)
+                expect(doc.tokens.length).toBe(1)
                 done()
             }).catch((e) => done(e))
         })

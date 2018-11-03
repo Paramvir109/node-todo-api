@@ -15,6 +15,10 @@ var Todo = mongoose.model('Todo', {//Now we can create instance of this model
     completedAt :{
         type : Number,
         default : null 
+    },
+    _creator : {//Only a creator can create a todo
+        type : mongoose.Schema.Types.ObjectId,
+        required : true
     }
 })
 module.exports = {Todo}

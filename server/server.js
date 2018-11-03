@@ -19,10 +19,11 @@ var app = express()
 const port = process.env.PORT || 3000 //For heroku
 app.use(bodyParser.json())//return value of this method is being given as middleware
 
-app.post('/todos', (req, res) => {//URl to which we want to send json data(todo)
+app.post('/todos',authenticate, (req, res) => {//URl to which we want to send json data(todo)
     //console.log(req.body)
     let todo = new Todo({
-        text : req.body.text
+        text : req.body.text,
+        _creator : req.user._id
     })
     
     todo.save().then((doc) => {
@@ -32,19 +33,25 @@ app.post('/todos', (req, res) => {//URl to which we want to send json data(todo)
     })
 })
 
-app.get('/todos', (req,res) => {
-    Todo.find().then((todos) => {
+app.get('/todos',authenticate, (req,res) => {//athenticate is a middleware required(we send x-auth property)
+    Todo.find({
+        _creator : req.user._id//Even if the text property is same we would get only one todo back
+    }).then((todos) => {
         res.send({todos})//will send object with todos prop with value which is an array
     }, (e) => {console.log(e)})
 })
 
 //fetching an individual todo
-app.get('/todos/:id', (req, res) => {//Use : for query params
+app.get('/todos/:id', authenticate, (req, res) => {//Use : for query params
     const id = req.params.id;//req.params will be an object with id property with value we specify
     if(!ObjectID.isValid(id)) {
         return res.status(404).send('Invalid object id')
     }
-    Todo.findById(id).then((todo) => {
+    // Todo.findById(id).then((todo) => {
+        Todo.findOne({
+            _id : id,
+            _creator : req.user._id
+        }).then((todo) => {
         if(todo){//If doc exists
            return res.send({todo})
         }
@@ -55,12 +62,15 @@ app.get('/todos/:id', (req, res) => {//Use : for query params
 //Deleting todos
 //Todo.remove({}).then((res)=>{},(e) => {})... -> removes all todos(res is an object)
 //Todo.findOneAndRemove().... Todo.findbyidandremove()- These will return the deleted object
-app.delete('/todos/:id', (req, res) => {//Use : for query params
+app.delete('/todos/:id',authenticate, (req, res) => {//Use : for query params
     const id = req.params.id;//req.params will be an object with id property with value we specify
     if(!ObjectID.isValid(id)) {
         return res.status(404).send('Invalid object id')
     }
-    Todo.findByIdAndDelete(id).then((todo) => {
+    Todo.findOneAndRemove({
+        _id : id,
+        _creator : req.user._id
+    }).then((todo) => {
         if(todo){
            return res.send({todo})
         }
@@ -68,7 +78,7 @@ app.delete('/todos/:id', (req, res) => {//Use : for query params
     }).catch((e) => res.status(400).send(e))
 
 })
-app.patch('/todos/:id' , (req, res) =>{  
+app.patch('/todos/:id' , authenticate, (req, res) =>{  
     const id = req.params.id;
     var body = _.pick(req.body , ['text' , 'completed'])//User can only change these props in req.body object
 
@@ -82,7 +92,10 @@ app.patch('/todos/:id' , (req, res) =>{
         body.completed = false;
         body.completedAt = null;
     }
-    Todo.findByIdAndUpdate(id, {$set : body}, {new : true})
+    Todo.findOneAndUpdate({
+       _id : id,
+       _creator : req.user._id 
+    }, {$set : body}, {new : true})
     .then((todo) => {
         if(!todo) {
             return res.status(404).send();
