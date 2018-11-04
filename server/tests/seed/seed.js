@@ -37,7 +37,7 @@ const myUser = [
         tokens : [
             {
             access : 'auth',
-            token : jwt.sign({_id : user1ID, access : 'auth'}, 'abc123').toString()
+            token : jwt.sign({_id : user1ID, access : 'auth'}, process.env.JWT_SECRET).toString()
             }
         ]
     },
@@ -48,7 +48,7 @@ const myUser = [
         tokens : [//adding this to change the tests.(Done at 14th video)
             {
             access : 'auth',
-            token : jwt.sign({_id : user2ID, access : 'auth'}, 'abc123').toString()
+            token : jwt.sign({_id : user2ID, access : 'auth'}, process.env.JWT_SECRET).toString()
             }
         ]
     }

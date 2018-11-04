@@ -1,6 +1,8 @@
 //Mongoose is an Object Document Mapper (ODM). This means that Mongoose allows you to define objects 
 // /with a strongly-typed schema that is mapped to a MongoDB document.
 //Use killall -9 node to kill the server running(EADDR error)
+//herkou config:set <prop-name>=<prop-value>//That's how we set heroku variables
+//herkou config:unset <prop-name>
 require('./config/config')
 
 const express = require('express');
