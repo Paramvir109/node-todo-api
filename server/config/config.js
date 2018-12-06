@@ -1,4 +1,3 @@
-var config = require('./config.json')
 var env = process.env.NODE_ENV || 'development'
 //This only set inside heroku environment(gotta configure in package json to use for test environment)
 
