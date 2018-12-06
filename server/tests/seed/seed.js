@@ -45,7 +45,7 @@ const myUser = [
         _id : user2ID,
         email : 'okay2@ymail.com',
         password : 'userpasstwo',
-        tokens : [//adding this to change the tests.(Done at 14th video)
+        tokens : [//adding this to change the tests.(Done at 14th video)(Otherwise it was empty)
             {
             access : 'auth',
             token : jwt.sign({_id : user2ID, access : 'auth'}, process.env.JWT_SECRET).toString()

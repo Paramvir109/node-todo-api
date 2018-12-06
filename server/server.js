@@ -1,8 +1,4 @@
-//Mongoose is an Object Document Mapper (ODM). This means that Mongoose allows you to define objects 
-// /with a strongly-typed schema that is mapped to a MongoDB document.
-//Use killall -9 node to kill the server running(EADDR error)
-//herkou config:set <prop-name>=<prop-value>//That's how we set heroku variables
-//herkou config:unset <prop-name>
+
 require('./config/config')
 
 const express = require('express');
@@ -35,7 +31,7 @@ app.post('/todos',authenticate, (req, res) => {//URl to which we want to send js
     })
 })
 
-app.get('/todos',authenticate, (req,res) => {//athenticate is a middleware required(we send x-auth property)
+app.get('/todos',authenticate, (req,res) => {//authenticate is a middleware required(we send x-auth property)
     Todo.find({
         _creator : req.user._id//Even if the text property is same we would get only one todo back
     }).then((todos) => {
