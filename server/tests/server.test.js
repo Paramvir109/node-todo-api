@@ -126,7 +126,8 @@ describe('DELETE /todos/:id' ,() => {
                return done(err)
             }
             Todo.findById(id).then((todo)=>{
-                expect(todo).toNotExist()
+                // expect(todo).toNotExist()
+                expect(todo).toBeFalsy()//New jest expect 21.1.0
                 done()
             }).catch((e) => done(e))
         });
@@ -142,7 +143,8 @@ describe('DELETE /todos/:id' ,() => {
                return done(err)
             }
             Todo.findById(id).then((todo)=>{
-                expect(todo).toExist()
+                // expect(todo).toExist()
+                expect(todo).toBeTruthy()
                 done()
             }).catch((e) => done(e))
         });
@@ -181,7 +183,8 @@ describe('PATCH todos/id', () => {
         .expect(200)
         .expect((res) => {
             expect(res.body.todo.text).toBe(upTodo.text)
-            expect(res.body.todo.completedAt).toBeA('number')//Usie in quotes
+            // expect(res.body.todo.completedAt).toBeA('number')//Usie in quotes
+            expect(typeof res.body.todo.completedAt).toBe('number')//jest expect
         })
         .end(done)
     })
@@ -207,7 +210,7 @@ describe('PATCH todos/id', () => {
         .send({completed : false})
         .expect(200)
         .expect((res) => {
-            expect(res.body.todo.completedAt).toNotExist();
+            expect(res.body.todo.completedAt).toBeFalsy();//Jest
         })
         .end(done)
         
@@ -247,8 +250,8 @@ describe('POST /users' ,() => {
         .send(user)
         .expect(200)
         .expect((res) => {
-            expect(res.headers['x-auth']).toExist()
-            expect(res.body._id).toExist()
+            expect(res.headers['x-auth']).toBeTruthy()
+            expect(res.body._id).toBeTruthy()
             expect(res.body.email).toBe(user.email)
         })
         .end((err) => {
@@ -256,8 +259,9 @@ describe('POST /users' ,() => {
                return done(err)
             }
             User.findOne({email : user.email}).then((doc) => {
-                expect(doc).toExist()
-                expect(doc.password).toNotEqual(user.password)
+                expect(doc).toBeTruthy()
+                // expect(doc.password).toNotEqual(user.password)
+                expect(doc.password).not.toEqual(user.password)
                 done()
             }).catch((e) => done(e))
         })
@@ -299,14 +303,18 @@ describe('POST /users/login' ,() => {
         .send(user)
         .expect(200)
         .expect((res) => {
-            expect(res.headers['x-auth']).toExist()
+            expect(res.headers['x-auth']).toBeTruthy()
         })
         .end((err,res)=>{
             if(err) {
                 return done(err)
             }
             User.findById(res.body._id).then((doc) => {//Or use myUser[1]._id
-                expect(doc.tokens[1]).toInclude( {//As 0th item contains hardcoded token(of User id 2)
+                // expect(doc.tokens[1]).toInclude( {//As 0th item contains hardcoded token(of User id 2)
+                //     access : 'auth',
+                //     token : res.headers['x-auth']
+                // })
+                expect(doc.toObject().tokens[1]).toMatchObject( {//Tricky one(last video)
                     access : 'auth',
                     token : res.headers['x-auth']
                 })
@@ -324,7 +332,7 @@ describe('POST /users/login' ,() => {
         .send(user)
         .expect(400)
         .expect((res) => {
-            expect(res.headers['x-auth']).toNotExist()
+            expect(res.headers['x-auth']).toBeFalsy()
         })
         .end((err,res)=>{
             if(err) {
